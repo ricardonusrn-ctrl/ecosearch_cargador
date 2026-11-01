@@ -1,7 +1,7 @@
 """Escritura de plantillas editando el XML de la hoja 1 directamente.
 
 La plataforma (Azure) no lee las plantillas si se regraban con openpyxl, así que aquí solo
-cambian sheet1.xml (y styles.xml si falta el formato de fecha d-mmm-yyyy). El resto del zip
+cambian sheet1.xml (y styles.xml si falta el estilo de fecha corta). El resto del zip
 (hojas Ref*, workbook, sharedStrings...) se copia byte a byte.
 """
 from __future__ import annotations
@@ -10,7 +10,9 @@ import re
 import zipfile
 from xml.sax.saxutils import escape
 
-DATE_FORMAT_CODE = r"d\-mmm\-yyyy"
+# Formato integrado "Fecha corta" de Excel (se ve según la configuración regional, dd/mm/aaaa
+# en español). Al ser integrado no necesita entrada <numFmt> en styles.xml.
+SHORT_DATE_FMT_ID = 14
 
 # Un valor de celda: ("s", texto) | ("n", número) | ("d", serial_excel)
 Cell = tuple
@@ -50,23 +52,8 @@ def rows_xml(rows: list[list[Cell]], first_row: int, date_style: int) -> str:
 
 
 def ensure_date_style(styles_xml: str) -> tuple[str, int]:
-    """Devuelve (styles_xml, índice de xf con formato d-mmm-yyyy). Lo agrega si falta."""
-    code = re.escape(DATE_FORMAT_CODE)
-    m = re.search(rf'<numFmt\b[^>]*numFmtId="(\d+)"[^>]*formatCode="{code}"', styles_xml) or \
-        re.search(rf'<numFmt\b[^>]*formatCode="{code}"[^>]*numFmtId="(\d+)"', styles_xml)
-    if m:
-        fmt_id = int(m.group(1))
-    else:
-        ids = [int(x) for x in re.findall(r'<numFmt\b[^>]*numFmtId="(\d+)"', styles_xml)]
-        fmt_id = max([163] + ids) + 1
-        new = f'<numFmt numFmtId="{fmt_id}" formatCode="{DATE_FORMAT_CODE}"/>'
-        if "<numFmts" in styles_xml:
-            styles_xml = re.sub(r'<numFmts count="(\d+)"',
-                                lambda k: f'<numFmts count="{int(k.group(1)) + 1}"', styles_xml, count=1)
-            styles_xml = styles_xml.replace("</numFmts>", new + "</numFmts>", 1)
-        else:
-            styles_xml = re.sub(r"(<styleSheet\b[^>]*>)", r'\1<numFmts count="1">' + new + "</numFmts>",
-                                styles_xml, count=1)
+    """Devuelve (styles_xml, índice de xf con formato Fecha corta). Lo agrega si falta."""
+    fmt_id = SHORT_DATE_FMT_ID
     block = re.search(r"<cellXfs\b[^>]*>(.*?)</cellXfs>", styles_xml, re.S)
     xfs = re.findall(r"<xf\b[^>]*?(?:/>|>.*?</xf>)", block.group(1), re.S)
     for i, xf in enumerate(xfs):

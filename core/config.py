@@ -12,8 +12,11 @@ DEFAULTS = {
     "log_type": "PROCESSED",
     "drill_size": 8.5,
     "casing_size": 7,
-    "service_types": ["PRESION-TEMPERATURA", "ILT"],
+    "service_types": ["PRESION-TEMPERATURA", "ILT", "PRODUCCION-PLT", "PLT",
+                      "REGISTRO CORRELACION", "REGISTRO MEMORIZADO"],
     "default_service_type": "PRESION-TEMPERATURA",
+    # Escala (hoja RefScale) de las imágenes que vienen solo en tiempo
+    "time_scale": "ESC-60/TIME",
     # Step supuesto cuando no hay .las del log (se avisa en el reporte)
     "step_time": 1.0,
     "step_md": 0.5,

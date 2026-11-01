@@ -87,10 +87,24 @@ def parse_log_name(path_or_name: str) -> LogName:
     return LogName(filename, stem, ext, fecha, unit, mdtime, top, bottom, run, kind, notes)
 
 
-def scale_from_image(path_or_name: str) -> str | None:
-    """ESC200 -> 'ESC-200' (debe existir igual en la hoja RefScale)."""
+TIME_SCALE = "ESC-60/TIME"
+
+
+def is_time_image(path_or_name: str) -> bool:
+    """¿Imagen solo en tiempo? (estaciones: ..._0-300_S_TIME.pdf, o TIME suelto en el nombre)."""
+    stem = os.path.splitext(basename(path_or_name))[0]
+    return bool(re.search(r"(^|[_\-. ])TIME([_\-. ]|$)", stem, re.I))
+
+
+def scale_from_image(path_or_name: str, time_scale: str = TIME_SCALE) -> str | None:
+    """ESC200 -> 'ESC-200' (debe existir igual en la hoja RefScale). Las imágenes solo en
+    tiempo (y ESC60, que solo existe como escala de tiempo) van en `time_scale`."""
+    if is_time_image(path_or_name):
+        return time_scale
     m = re.search(r"ESC[-_ ]?(\d+)", basename(path_or_name), re.I)
-    return f"ESC-{m.group(1)}" if m else None
+    if not m:
+        return None
+    return time_scale if m.group(1) == "60" else f"ESC-{m.group(1)}"
 
 
 def norm_alnum(s: str) -> str:

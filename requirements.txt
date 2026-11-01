@@ -1,3 +1,4 @@
 customtkinter>=5.2
 openpyxl>=3.1
+pillow>=10       # logo del encabezado
 pytest>=8        # solo para las pruebas

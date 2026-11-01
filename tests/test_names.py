@@ -1,5 +1,5 @@
 from datetime import date
-from core.names import parse_log_name, scale_from_image, path_matches_well
+from core.names import is_time_image, parse_log_name, scale_from_image, path_matches_well
 
 P = "/data/ecpprov/DATA/BONDENERGY/APIAY-2026-P&T/LIBERTAD-NORTE-11/"
 
@@ -41,6 +41,15 @@ def test_spanish_month():
 
 def test_scale():
     assert scale_from_image("a/LIBERTAD_NORTE-11_P&T_LOG_RUN1_12-MAY-2026_OFF_12-8400_FT_ESC200_MD.pdf") == "ESC-200"
+
+
+def test_time_only_image_scale():
+    assert is_time_image("a/X_P&T_LOG_12-MAY-2026_3000_FT_MD_0-300_S_TIME.pdf")
+    assert scale_from_image("a/X_P&T_LOG_12-MAY-2026_3000_FT_MD_0-300_S_TIME.pdf") == "ESC-60/TIME"
+    assert scale_from_image("a/X_LOG_12-MAY-2026_ESC60_TIME.tif") == "ESC-60/TIME"
+    assert scale_from_image("a/X_LOG_12-MAY-2026_0-300_ESC60.pdf") == "ESC-60/TIME"
+    assert not is_time_image("a/X_P&T_LOG_RUN1_12-MAY-2026_OFF_12-8400_FT_ESC200_MD.pdf")
+    assert not is_time_image("a/X_TIMELAPSE_ESC200_MD.pdf")
 
 
 def test_well_path_check():
