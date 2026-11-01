@@ -1,0 +1,15 @@
+{
+  "well_type": "DEFINITIVO",
+  "pdat": "Rotary Table (RT)",
+  "null": -999.25,
+  "service_company": "BOND ENERGY SOLUTIONS SAS",
+  "log_type": "PROCESSED",
+  "drill_size": 8.5,
+  "casing_size": 7,
+  "service_types": ["PRESION-TEMPERATURA", "ILT"],
+  "default_service_type": "PRESION-TEMPERATURA",
+  "step_time": 1.0,
+  "step_md": 0.5,
+  "step_md_up": -0.5,
+  "default_run": 1
+}
