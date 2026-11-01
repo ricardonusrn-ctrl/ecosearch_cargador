@@ -128,6 +128,18 @@ def test_service_types_in_config():
         assert t in types
 
 
+def test_installed_config_next_to_exe_wins(tmp_path, monkeypatch):
+    """En el .exe instalado, el config.json junto al .exe manda sobre el empaquetado."""
+    import json
+    import core.config as config
+    exe_cfg = tmp_path / "config.json"
+    exe_cfg.write_text(json.dumps({"service_types": ["ILT"], "drill_size": 6.125}), encoding="utf-8")
+    monkeypatch.setattr(config, "EXE_CONFIG_PATH", str(exe_cfg))
+    cfg = config.load_config()
+    assert cfg["service_types"] == ["ILT"] and cfg["drill_size"] == 6.125
+    assert cfg["time_scale"] == "ESC-60/TIME"                  # lo demás sigue igual
+
+
 def _img_template(inputs, names):
     """Plantilla Well Log Image con estas imágenes (misma carpeta que las de referencia)."""
     _, _, tmp = inputs

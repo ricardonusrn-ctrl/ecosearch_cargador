@@ -47,14 +47,19 @@ FNT_BODY = ("Segoe UI", 12)
 FNT_SMALL = ("Segoe UI", 10)
 FNT_BTN = ("Segoe UI", 12, "bold")
 
+# Versión publicada (título, pie de página). Se sube junto con version_info.txt y MyAppVersion
+# del .iss al publicar un instalador nuevo.
+APP_VERSION = "1.0"
+
 LOGO_NAME = "LOGO BOND.png"
+ICON_NAME = "CARGADOR ECOSEARCH.ico"
 SHEET_TITLES = {"well_log": "Well Log", "well_log_image": "Well Log Image"}
 
 
-def find_logo() -> str | None:
+def find_asset(name: str) -> str | None:
     """Junto al programa (desarrollo o .exe con --add-data) o junto al .exe."""
     for d in (ROOT, os.path.dirname(os.path.abspath(sys.argv[0]))):
-        path = os.path.join(d, LOGO_NAME)
+        path = os.path.join(d, name)
         if os.path.isfile(path):
             return path
     return None
@@ -266,7 +271,13 @@ class App(ctk.CTk):
         ttk.Style(self).theme_use("clam")            # 'vista' ignora el fondo del Treeview
         self._style_tables()
         self.cfg = load_config()
-        self.title("Bond Energy Solutions  —  CARGADOR ECOSEARCH")
+        self.title(f"Bond Energy Solutions  —  CARGADOR ECOSEARCH  v{APP_VERSION}")
+        icon = find_asset(ICON_NAME)
+        if icon and sys.platform.startswith("win"):
+            try:
+                self.iconbitmap(icon)
+            except Exception:                        # noqa: BLE001  (ícono es opcional)
+                pass
         self.geometry("1360x880")
         self.minsize(1100, 720)
         self.configure(fg_color=BG)
@@ -282,8 +293,8 @@ class App(ctk.CTk):
         body.grid_rowconfigure(0, weight=1)
         self._build_left(body)
         self._build_right(body)
-        ctk.CTkLabel(self, text="© 2026 Bond Energy Solutions SAS · Cargador Ecosearch · "
-                                "Todos los derechos reservados",
+        ctk.CTkLabel(self, text=f"© 2026 Bond Energy Solutions SAS · Cargador Ecosearch "
+                                f"v{APP_VERSION} · Todos los derechos reservados",
                      font=FNT_SMALL, text_color=TEXT_MUTE).pack(pady=6)
         if sys.platform.startswith("win"):
             self.after(0, lambda: self.state("zoomed"))
@@ -306,7 +317,7 @@ class App(ctk.CTk):
 
         left = ctk.CTkFrame(hdr, fg_color="transparent")
         left.pack(side="left", padx=20, pady=(10, 10), fill="y")
-        logo_img, logo = None, find_logo()
+        logo_img, logo = None, find_asset(LOGO_NAME)
         if logo and Image is not None:
             try:
                 pil = Image.open(logo)

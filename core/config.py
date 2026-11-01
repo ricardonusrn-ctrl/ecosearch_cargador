@@ -1,8 +1,10 @@
-"""Reglas fijas del procedimiento. Se pueden cambiar en config.json (junto a app.py)."""
+"""Reglas fijas del procedimiento. Se pueden cambiar en config.json (junto a app.py, o junto al
+.exe en el programa instalado)."""
 from __future__ import annotations
 
 import json
 import os
+import sys
 
 DEFAULTS = {
     "well_type": "DEFINITIVO",
@@ -26,13 +28,20 @@ DEFAULTS = {
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONFIG_PATH = os.path.join(ROOT, "config.json")
+# En el .exe, ROOT es la carpeta temporal del empaquetado: el config.json editable es el que el
+# instalador deja junto al .exe, y manda sobre el empaquetado.
+EXE_CONFIG_PATH = (os.path.join(os.path.dirname(sys.executable), "config.json")
+                   if getattr(sys, "frozen", False) else None)
 
 
-def load_config(path: str = CONFIG_PATH) -> dict:
+def load_config(path: str | None = None) -> dict:
     cfg = dict(DEFAULTS)
-    try:
-        with open(path, encoding="utf-8") as f:
-            cfg.update(json.load(f))
-    except FileNotFoundError:
-        pass
+    for p in [path] if path else [CONFIG_PATH, EXE_CONFIG_PATH]:
+        if not p:
+            continue
+        try:
+            with open(p, encoding="utf-8") as f:
+                cfg.update(json.load(f))
+        except FileNotFoundError:
+            pass
     return cfg

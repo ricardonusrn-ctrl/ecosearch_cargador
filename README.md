@@ -59,6 +59,19 @@ pytest
 ```
 Regenera las plantillas de LIBERTAD NORTE-11 y las compara celda a celda con las de referencia.
 
-## Crear un .exe (opcional)
-`pip install pyinstaller` y
-`pyinstaller --noconfirm --windowed --collect-all customtkinter --add-data "config.json;." --add-data "LOGO BOND.png;." app.py`
+## Instalador (Windows) — versión 1.0
+`Instalador\CARGADOR ECOSEARCH Setup v1.0.exe` es el único archivo que hay que llevar a otro equipo (no necesita
+Python ni Excel). Pide permisos de administrador; instala en
+`C:\Program Files\Bond Energy Solutions\CARGADOR ECOSEARCH` con accesos directos en el Escritorio y el menú Inicio,
+el **instructivo de usuario** (`docs\Instructivo CARGADOR ECOSEARCH.pdf`) y el `config.json` editable junto al
+`.exe` (ese manda sobre el que va dentro del `.exe`). Una versión nueva con el mismo `AppId` actualiza la anterior.
+
+### Compilar
+```powershell
+py -m PyInstaller "CARGADOR ECOSEARCH.spec" --noconfirm --clean
+py docs\make_instructivo.py          # solo si cambió el instructivo o la captura docs\pantalla_principal.png
+& "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe" "CARGADOR ECOSEARCH Setup.iss"
+```
+Usar siempre `--clean` (sin él PyInstaller puede reutilizar un build en caché). El ícono se regenera con
+`py tools\make_icon.py`. Para publicar otra versión, subirla en los tres sitios: `APP_VERSION` en `app.py`,
+`version_info.txt` y `MyAppVersion` en el `.iss`.
